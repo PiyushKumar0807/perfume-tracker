@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}{{ perfume.name }} - PerfumeAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/perfumes">Perfumes</a></li>
+            <li class="breadcrumb-item active">{{ perfume.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h1 class="h2 mb-2">{{ perfume.name }}</h1>
+                            <p class="text-muted mb-2">{{ perfume.brand }}</p>
+                            <div class="d-flex gap-2 mb-3">
+                                <span class="badge bg-primary">{{ perfume.fragrance_family }}</span>
+                                {% if perfume.gender_target %}
+                                <span class="badge bg-secondary">{{ perfume.gender_target }}</span>
+                                {% endif %}
+                                {% if perfume.price_range %}
+                                <span class="badge bg-info">{{ perfume.price_range }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            {% if perfume.avg_rating %}
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rating-display me-2">
+                                    {% for i in range(5) %}
+                                        {% if i < perfume.avg_rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% elif i < perfume.avg_rating + 0.5 %}
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="fw-bold">{{ "%.1f"|format(perfume.avg_rating) }}</span>
+                            </div>
+                            <small class="text-muted">{{ perfume.total_ratings }} rating{{ 's' if perfume.total_ratings != 1 else '' }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="lead">{{ perfume.description }}</p>
+                    </div>
+
+                    <!-- Notes Pyramid -->
+                    {% if perfume.top_notes or perfume.middle_notes or perfume.base_notes %}
+                    <div class="mb-4">
+                        <h5>Fragrance Notes</h5>
+                        <div class="notes-pyramid">
+                            {% set top_notes = perfume.top_notes | from_json if perfume.top_notes else [] %}
+                            {% set middle_notes = perfume.middle_notes | from_json if perfume.middle_notes else [] %}
+                            {% set base_notes = perfume.base_notes | from_json if perfume.base_notes else [] %}
+
+                            {% if top_notes %}
+                            <div class="notes-tier">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-wind"></i> Top Notes
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for note in top_notes %}
+                                    <span class="badge bg-light text-dark border">{{ note }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if middle_notes %}
+                            <div class="notes-tier">
+                                <h6 class="text-success mb-2">
+                                    <i class="fas fa-heart"></i> Heart Notes
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for note in middle_notes %}
+                                    <span class="badge bg-light text-dark border">{{ note }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if base_notes %}
+                            <div class="notes-tier">
+                                <h6 class="text-dark mb-2">
+                                    <i class="fas fa-anchor"></i> Base Notes
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for note in base_notes %}
+                                    <span class="badge bg-light text-dark border">{{ note }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Additional Info -->
+                    <div class="row g-3 mb-4">
+                        {% if perfume.launch_year %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-calendar-alt fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-1">Launch Year</h6>
+                                <p class="mb-0">{{ perfume.launch_year }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if perfume.perfumer %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-1">Perfumer</h6>
+                                <p class="mb-0">{{ perfume.perfumer }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if perfume.longevity %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-1">Longevity</h6>
+                                <p class="mb-0">{{ perfume.longevity }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if perfume.sillage %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-wind fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-1">Sillage</h6>
+                                <p class="mb-0">{{ perfume.sillage }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Recommendations -->
+                    {% if similar_perfumes %}
+                    <div class="mb-4">
+                        <h5>Similar Perfumes</h5>
+                        <div class="row g-3">
+                            {% for similar in similar_perfumes[:4] %}
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-1">{{ similar.name }}</h6>
+                                            {% if similar.avg_rating %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-star"></i> {{ "%.1f"|format(similar.avg_rating) }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ similar.brand }}</p>
+                                        <p class="text-muted small mb-2">{{ similar.fragrance_family }}</p>
+                                        <a href="/perfume/{{ similar.id }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Rating & Review Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>Your Rating
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user_rating %}
+                    <div class="text-center mb-3">
+                        <div class="rating-display mb-2">
+                            {% for i in range(5) %}
+                                {% if i < user_rating.rating %}
+                                    <i class="fas fa-star text-warning fa-lg"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning fa-lg"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <p class="text-muted mb-0">Your rating: {{ user_rating.rating }} star{{ 's' if user_rating.rating != 1 else '' }}</p>
+                        {% if user_rating.comment %}
+                        <blockquote class="blockquote mt-3">
+                            <p class="mb-0">{{ user_rating.comment }}</p>
+                        </blockquote>
+                        {% endif %}
+                        <button class="btn btn-outline-primary btn-sm mt-3" onclick="editRating()">
+                            <i class="fas fa-edit"></i> Edit Rating
+                        </button>
+                    </div>
+                    {% else %}
+                    <form id="rating-form" method="POST" action="/rate">
+                        <input type="hidden" name="perfume_id" value="{{ perfume.id }}">
+                        <div class="text-center mb-3">
+                            <label class="form-label">Rate this perfume:</label>
+                            <div class="rating-stars mb-3">
+                                <input type="radio" id="star5" name="rating" value="5" />
+                                <label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star4" name="rating" value="4" />
+                                <label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star3" name="rating" value="3" />
+                                <label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star2" name="rating" value="2" />
+                                <label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star1" name="rating" value="1" />
+                                <label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Review (optional)</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3"
+                                      placeholder="Share your thoughts about this perfume..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-star"></i> Submit Rating
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="/perfumes" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i> Browse More Perfumes
+                    </a>
+                    <a href="/dashboard" class="btn btn-outline-secondary">
+                        <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                    </a>
+                    <button class="btn btn-outline-info" onclick="sharePerfume()">
+                        <i class="fas fa-share"></i> Share This Perfume
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Reviews -->
+            {% if reviews %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% for review in reviews[:5] %}
+                    <div class="review-item mb-3 {% if not loop.last %}border-bottom pb-3{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>{{ review.user.username }}</strong>
+                            <div class="rating-display">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-muted"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if review.comment %}
+                        <p class="mb-1">{{ review.comment }}</p>
+                        {% endif %}
+                        <small class="text-muted">{{ review.created_at.strftime('%B %d, %Y') }}</small>
+                    </div>
+                    {% endfor %}
+
+                    {% if reviews|length > 5 %}
+                    <div class="text-center">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showAllReviews()">
+                            View All {{ reviews|length }} Reviews
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Rating Modal -->
+{% if user_rating %}
+<div class="modal fade" id="editRatingModal" tabindex="-1" aria-labelledby="editRatingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRatingModalLabel">Edit Your Rating</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="/rate">
+                <input type="hidden" name="perfume_id" value="{{ perfume.id }}">
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <label class="form-label">Update your rating:</label>
+                        <div class="rating-stars mb-3">
+                            <input type="radio" id="edit-star5" name="rating" value="5" {% if user_rating.rating == 5 %}checked{% endif %} />
+                            <label for="edit-star5" title="5 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="edit-star4" name="rating" value="4" {% if user_rating.rating == 4 %}checked{% endif %} />
+                            <label for="edit-star4" title="4 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="edit-star3" name="rating" value="3" {% if user_rating.rating == 3 %}checked{% endif %} />
+                            <label for="edit-star3" title="3 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="edit-star2" name="rating" value="2" {% if user_rating.rating == 2 %}checked{% endif %} />
+                            <label for="edit-star2" title="2 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="edit-star1" name="rating" value="1" {% if user_rating.rating == 1 %}checked{% endif %} />
+                            <label for="edit-star1" title="1 star"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-comment" class="form-label">Update your review:</label>
+                        <textarea class="form-control" id="edit-comment" name="comment" rows="3">{{ user_rating.comment or '' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Rating</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function editRating() {
+    const modal = new bootstrap.Modal(document.getElementById('editRatingModal'));
+    modal.show();
+}
+
+function sharePerfume() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ perfume.name }} - PerfumeAI',
+            text: 'Check out this perfume: {{ perfume.name }} by {{ perfume.brand }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            showAlert('Link copied to clipboard!', 'success');
+        });
+    }
+}
+
+function showAlert(message, type) {
+    var alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    var container = document.querySelector('.container-fluid');
+    if (container) {
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+    }
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+function showAllReviews() {
+    // This would typically load more reviews via AJAX
+    // For now, just scroll to a reviews section if it exists
+    const reviewsSection = document.querySelector('.card:has(h5:contains("Recent Reviews"))');
+    if (reviewsSection) {
+        reviewsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Initialize rating system
+document.addEventListener('DOMContentLoaded', function() {
+    // Rating form validation and AJAX submission
+    const ratingForm = document.getElementById('rating-form');
+    if (ratingForm) {
+        ratingForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const ratingInputs = ratingForm.querySelectorAll('input[name="rating"]:checked');
+            if (ratingInputs.length === 0) {
+                showAlert('Please select a rating before submitting.', 'warning');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData(ratingForm);
+
+            // Submit via AJAX
+            fetch('/rate', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    // Reload the page after a short delay to show updated rating
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while submitting your rating.', 'danger');
+            });
+        });
+    }
+});
+</script>
+
+<style>
+.notes-pyramid {
+    position: relative;
+}
+
+.notes-tier {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.notes-tier:nth-child(1) { border-left-color: #007bff; }
+.notes-tier:nth-child(2) { border-left-color: #28a745; }
+.notes-tier:nth-child(3) { border-left-color: #6c757d; }
+
+.rating-display {
+    font-size: 1.2rem;
+}
+
+.review-item blockquote {
+    font-size: 0.9rem;
+    border-left: 3px solid #007bff;
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+    color: #6c757d;
+}
+</style>
+{% endblock %}

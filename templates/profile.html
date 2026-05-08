@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - PerfumeAI{% endblock %}
+
+{% block content %}
+<!-- Profile Hero Section -->
+<section class="hero-section text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-user-circle me-3"></i>
+                    Your Profile
+                </h1>
+                <p class="lead mb-4">
+                    Customize your fragrance preferences to get personalized AI recommendations
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <div class="profile-completion-card">
+                        <div class="d-flex align-items-center">
+                            <div class="progress-circle me-3">
+                                <span class="progress-text">{{ user.profile_completion_percentage }}%</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-white">Profile Completion</h6>
+                                <small class="text-white-50">
+                                    {% if user.profile_complete %}
+                                        Complete! Your recommendations are optimized.
+                                    {% else %}
+                                        Complete your profile for better recommendations.
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="floating">
+                    <i class="fas fa-user-edit feature-icon fa-4x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <form method="POST" class="profile-form">
+        <!-- Basic Information Card -->
+        <div class="card profile-card mb-4 fade-in-up">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username"
+                                   value="{{ user.username }}" readonly placeholder="Username">
+                            <label for="username">Username</label>
+                            <div class="form-text">Username cannot be changed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email"
+                                   value="{{ user.email }}" readonly placeholder="Email">
+                            <label for="email">Email</label>
+                            <div class="form-text">Email cannot be changed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="full_name" name="full_name"
+                                   value="{{ user.full_name }}" placeholder="Full Name">
+                            <label for="full_name">Full Name</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="age" name="age"
+                                   value="{{ user.age }}" min="13" max="120" placeholder="Age">
+                            <label for="age">Age</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="gender" name="gender">
+                                <option value="">Prefer not to say</option>
+                                <option value="Male" {{ 'selected' if user.gender == 'Male' else '' }}>Male</option>
+                                <option value="Female" {{ 'selected' if user.gender == 'Female' else '' }}>Female</option>
+                                <option value="Non-binary" {{ 'selected' if user.gender == 'Non-binary' else '' }}>Non-binary</option>
+                            </select>
+                            <label for="gender">Gender</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="perfume_knowledge" name="perfume_knowledge">
+                                <option value="Beginner" {{ 'selected' if user.perfume_knowledge == 'Beginner' else '' }}>Beginner</option>
+                                <option value="Intermediate" {{ 'selected' if user.perfume_knowledge == 'Intermediate' else '' }}>Intermediate</option>
+                                <option value="Expert" {{ 'selected' if user.perfume_knowledge == 'Expert' else '' }}>Expert</option>
+                            </select>
+                            <label for="perfume_knowledge">Perfume Knowledge Level</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="skin_tone" name="skin_tone">
+                                <option value="">Not specified</option>
+                                <option value="Very Fair" {{ 'selected' if user.skin_tone == 'Very Fair' else '' }}>Very Fair</option>
+                                <option value="Fair" {{ 'selected' if user.skin_tone == 'Fair' else '' }}>Fair</option>
+                                <option value="Medium" {{ 'selected' if user.skin_tone == 'Medium' else '' }}>Medium</option>
+                                <option value="Olive" {{ 'selected' if user.skin_tone == 'Olive' else '' }}>Olive</option>
+                                <option value="Tan" {{ 'selected' if user.skin_tone == 'Tan' else '' }}>Tan</option>
+                                <option value="Deep" {{ 'selected' if user.skin_tone == 'Deep' else '' }}>Deep</option>
+                            </select>
+                            <label for="skin_tone">Skin Tone</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="location" name="location"
+                                   value="{{ user.location }}" placeholder="City, Country">
+                            <label for="location">Location</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="">Prefer not to say</option>
+                                    <option value="Male" {{ 'selected' if user.gender == 'Male' else '' }}>Male</option>
+                                    <option value="Female" {{ 'selected' if user.gender == 'Female' else '' }}>Female</option>
+                                    <option value="Non-binary" {{ 'selected' if user.gender == 'Non-binary' else '' }}>Non-binary</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="perfume_knowledge" class="form-label">Perfume Knowledge Level</label>
+                                <select class="form-select" id="perfume_knowledge" name="perfume_knowledge">
+                                    <option value="Beginner" {{ 'selected' if user.perfume_knowledge == 'Beginner' else '' }}>Beginner</option>
+                                    <option value="Intermediate" {{ 'selected' if user.perfume_knowledge == 'Intermediate' else '' }}>Intermediate</option>
+                                    <option value="Expert" {{ 'selected' if user.perfume_knowledge == 'Expert' else '' }}>Expert</option>
+                                </select>
+                            </div>
+                        </div>
+
+        <!-- Fragrance Preferences Card -->
+        <div class="card profile-card mb-4 fade-in-up">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-heart me-2"></i>Fragrance Preferences
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="fas fa-spray-can me-2"></i>Preferred Fragrance Families
+                    </h6>
+                    <div class="row g-2">
+                        {% set families = ['Floral', 'Woody', 'Oriental', 'Fresh', 'Citrus', 'Gourmand', 'Chypre', 'Aquatic', 'Aromatic', 'Spicy', 'Fougère', 'Musk'] %}
+                        {% for family in families %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="form-check preference-check">
+                                <input class="form-check-input" type="checkbox" id="family_{{ family.lower() }}"
+                                       name="preferred_families" value="{{ family }}"
+                                       {{ 'checked' if preferences and family in preferences.get_families() else '' }}>
+                                <label class="form-check-label" for="family_{{ family.lower() }}">
+                                    {{ family }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="fas fa-calendar-alt me-2"></i>Preferred Seasons
+                    </h6>
+                    <div class="row g-2">
+                        {% set seasons = ['Spring', 'Summer', 'Fall', 'Winter'] %}
+                        {% for season in seasons %}
+                        <div class="col-md-3">
+                            <div class="form-check preference-check">
+                                <input class="form-check-input" type="checkbox" id="season_{{ season.lower() }}"
+                                       name="preferred_seasons" value="{{ season }}"
+                                       {{ 'checked' if preferences and season in preferences.get_seasons() else '' }}>
+                                <label class="form-check-label" for="season_{{ season.lower() }}">
+                                    <i class="fas fa-{{ 'leaf' if season == 'Spring' else 'sun' if season == 'Summer' else 'maple-leaf' if season == 'Fall' else 'snowflake' }} me-1"></i>
+                                    {{ season }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="fas fa-glass-cheers me-2"></i>Preferred Occasions
+                    </h6>
+                    <div class="row g-2">
+                        {% set occasions = ['Casual', 'Office', 'Evening', 'Night', 'Sport', 'Special', 'Daytime'] %}
+                        {% for occasion in occasions %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="form-check preference-check">
+                                <input class="form-check-input" type="checkbox" id="occasion_{{ occasion.lower() }}"
+                                       name="preferred_occasions" value="{{ occasion }}"
+                                       {{ 'checked' if preferences and occasion in preferences.get_occasions() else '' }}>
+                                <label class="form-check-label" for="occasion_{{ occasion.lower() }}">
+                                    {{ occasion }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="intensity_pref" name="intensity_pref">
+                                <option value="Light" {{ 'selected' if preferences and preferences.intensity_pref == 'Light' else '' }}>Light</option>
+                                <option value="Moderate" {{ 'selected' if preferences and preferences.intensity_pref == 'Moderate' else '' }}>Moderate</option>
+                                <option value="Strong" {{ 'selected' if preferences and preferences.intensity_pref == 'Strong' else '' }}>Strong</option>
+                            </select>
+                            <label for="intensity_pref">Preferred Intensity</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="price_range" name="price_range">
+                                <option value="Budget" {{ 'selected' if preferences and preferences.price_range == 'Budget' else '' }}>Budget (&lt; $50)</option>
+                                <option value="Mid-range" {{ 'selected' if preferences and preferences.price_range == 'Mid-range' else '' }}>Mid-range ($50-$150)</option>
+                                <option value="Luxury" {{ 'selected' if preferences and preferences.price_range == 'Luxury' else '' }}>Luxury ($150-$500)</option>
+                                <option value="Ultra-luxury" {{ 'selected' if preferences and preferences.price_range == 'Ultra-luxury' else '' }}>Ultra-luxury (&gt; $500)</option>
+                            </select>
+                            <label for="price_range">Preferred Price Range</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Preferences Card -->
+        <div class="card profile-card mb-4 fade-in-up">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-leaf me-2"></i>Notes Preferences
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <h6 class="fw-bold text-warning-emphasis mb-3">
+                        <i class="fas fa-heart text-success me-2"></i>Notes You Love
+                    </h6>
+                    <div class="row g-2">
+                        {% set loved_notes = ['Rose', 'Jasmine', 'Vanilla', 'Sandalwood', 'Oud', 'Musk', 'Bergamot', 'Patchouli', 'Cedar', 'Vetiver', 'Amber', 'Lavender', 'Orange', 'Lemon', 'Cinnamon', 'Honey'] %}
+                        {% for note in loved_notes %}
+                        <div class="col-md-3 col-sm-6">
+                            <div class="form-check preference-check">
+                                <input class="form-check-input" type="checkbox" id="liked_{{ note.lower() }}"
+                                       name="notes_liked" value="{{ note }}"
+                                       {{ 'checked' if preferences and note in preferences.get_liked_notes() else '' }}>
+                                <label class="form-check-label" for="liked_{{ note.lower() }}">
+                                    {{ note }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <h6 class="fw-bold text-warning-emphasis mb-3">
+                        <i class="fas fa-times text-danger me-2"></i>Notes You Dislike
+                    </h6>
+                    <div class="row g-2">
+                        {% set disliked_notes = ['Rose', 'Jasmine', 'Vanilla', 'Sandalwood', 'Oud', 'Musk', 'Bergamot', 'Patchouli', 'Cedar', 'Vetiver', 'Amber', 'Lavender', 'Orange', 'Lemon', 'Cinnamon', 'Honey'] %}
+                        {% for note in disliked_notes %}
+                        <div class="col-md-3 col-sm-6">
+                            <div class="form-check preference-check">
+                                <input class="form-check-input" type="checkbox" id="disliked_{{ note.lower() }}"
+                                       name="notes_disliked" value="{{ note }}"
+                                       {{ 'checked' if preferences and note in preferences.get_disliked_notes() else '' }}>
+                                <label class="form-check-label" for="disliked_{{ note.lower() }}">
+                                    {{ note }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="card profile-card mb-5 fade-in-up">
+            <div class="card-body p-4 text-center">
+                <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-save me-2"></i>Save Profile
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Your preferences help our AI provide better fragrance recommendations
+                    </small>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Perfumes - PerfumeAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-search text-primary me-2"></i>Browse Perfumes
+                    </h1>
+                    <p class="text-muted mb-0">Discover your next favorite fragrance</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="fas fa-filter"></i> Filters
+                    </button>
+                    <a href="/dashboard" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if filters_relaxed %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info mb-0 py-2">
+                <i class="fas fa-info-circle me-2"></i>
+                Those filters matched very few (or no) perfumes in the catalog, so we relaxed them step by step
+                until at least {{ browse_min_results }} results could be shown.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search and Sort Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search-input"
+                                       placeholder="Search perfumes by name, brand, or notes..."
+                                       value="{{ request.args.get('search', '') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="sort-select">
+                                <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Sort by Name</option>
+                                <option value="brand" {% if request.args.get('sort') == 'brand' %}selected{% endif %}>Sort by Brand</option>
+                                <option value="rating" {% if request.args.get('sort') == 'rating' %}selected{% endif %}>Sort by Rating</option>
+                                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest First</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary flex-fill" onclick="applyFilters()">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Filters Display -->
+    {% if active_filters %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="text-muted">Active filters:</span>
+                {% for param, label, value in active_filters %}
+                    {% if value %}
+                        <span class="badge bg-primary">
+                            {{ label }}: {{ value }}
+                            <button type="button" class="btn-close btn-close-white ms-1"
+                                    onclick="removeFilter('{{ param }}')" aria-label="Remove filter"></button>
+                        </span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Results Count -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <p class="text-muted mb-0">
+                {% if perfumes and perfumes.total > 0 %}
+                    Showing {{ perfumes.total }} perfume{{ 's' if perfumes.total != 1 else '' }}
+                    {% if total_count and total_count > perfumes.total %}
+                        of {{ total_count }}
+                    {% endif %}
+                {% else %}
+                    No perfumes found matching your criteria
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Perfumes Grid -->
+    {% if perfumes and perfumes.total > 0 %}
+    <div class="row g-4" id="perfumes-container">
+        {% for perfume in perfumes.items %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 perfume-card">
+                <div class="card-body d-flex flex-column">
+                    <!-- Header with rating -->
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-1">{{ perfume.name }}</h6>
+                        {% if perfume.avg_rating %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(perfume.avg_rating) }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Brand and Family -->
+                    <p class="text-muted small mb-1">{{ perfume.brand }}</p>
+                    <p class="text-muted small mb-2">
+                        <span class="badge bg-light text-dark">{{ perfume.fragrance_family }}</span>
+                    </p>
+
+                    <!-- Description -->
+                    <p class="card-text small flex-grow-1">{{ perfume.description|truncate(100) }}</p>
+
+                    <!-- Notes Preview -->
+                    {% if perfume.top_notes or perfume.middle_notes or perfume.base_notes %}
+                    <div class="mb-3">
+                        <small class="text-muted">Key notes:</small>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            {% set top_notes = perfume.top_notes | parse_notes if perfume.top_notes else [] %}
+                            {% set middle_notes = perfume.middle_notes | parse_notes if perfume.middle_notes else [] %}
+                            {% set base_notes = perfume.base_notes | parse_notes if perfume.base_notes else [] %}
+                            {% for note in top_notes[:2] %}
+                                <span class="badge bg-secondary">{{ note }}</span>
+                            {% endfor %}
+                            {% for note in middle_notes[:2] %}
+                                <span class="badge bg-info">{{ note }}</span>
+                            {% endfor %}
+                            {% for note in base_notes[:1] %}
+                                <span class="badge bg-dark">{{ note }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Price Range -->
+                    {% if perfume.price_range %}
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-dollar-sign"></i> {{ perfume.price_range }}
+                    </p>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="/perfume/{{ perfume.id|default(0) }}" class="btn btn-primary btn-sm flex-fill">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="quickRate(this.dataset.perfumeId, this.dataset.perfumeName)"
+                                data-bs-toggle="modal" data-bs-target="#ratingModal"
+                                data-perfume-id="{{ perfume.id|default(0) }}"
+                                data-perfume-name="{{ perfume.name|default('') }}">
+                            <i class="fas fa-star"></i> Rate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Perfume pagination">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('perfumes', page=current_page-1, **perfumes_query_args) }}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in pagination_pages %}
+                    <li class="page-item {% if page_num == current_page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('perfumes', page=page_num, **perfumes_query_args) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('perfumes', page=current_page+1, **perfumes_query_args) }}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Results -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">No perfumes found</h4>
+                <p class="text-muted mb-4">
+                    Try adjusting your search criteria or filters to find more results.
+                </p>
+                <button class="btn btn-primary" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear All Filters
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="fas fa-filter text-primary me-2"></i>Filter Perfumes
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="filter-form">
+                    <div class="row g-3">
+                        <!-- Fragrance Family -->
+                        <div class="col-md-6">
+                            <label class="form-label">Fragrance Family</label>
+                            <select class="form-select" name="family" id="family-filter">
+                                <option value="">All Families</option>
+                                <option value="Floral" {% if request.args.get('family') == 'Floral' %}selected{% endif %}>Floral</option>
+                                <option value="Oriental" {% if request.args.get('family') == 'Oriental' %}selected{% endif %}>Oriental</option>
+                                <option value="Woody" {% if request.args.get('family') == 'Woody' %}selected{% endif %}>Woody</option>
+                                <option value="Fresh" {% if request.args.get('family') == 'Fresh' %}selected{% endif %}>Fresh</option>
+                                <option value="Citrus" {% if request.args.get('family') == 'Citrus' %}selected{% endif %}>Citrus</option>
+                                <option value="Spicy" {% if request.args.get('family') == 'Spicy' %}selected{% endif %}>Spicy</option>
+                                <option value="Aromatic" {% if request.args.get('family') == 'Aromatic' %}selected{% endif %}>Aromatic</option>
+                                <option value="Leather" {% if request.args.get('family') == 'Leather' %}selected{% endif %}>Leather</option>
+                            </select>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="col-md-6">
+                            <label class="form-label">Gender</label>
+                            <select class="form-select" name="gender" id="gender-filter">
+                                <option value="">All Genders</option>
+                                <option value="Male" {% if request.args.get('gender') == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if request.args.get('gender') == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Unisex" {% if request.args.get('gender') == 'Unisex' %}selected{% endif %}>Unisex</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="col-md-6">
+                            <label class="form-label">Price Range</label>
+                            <select class="form-select" name="price_range" id="price-filter">
+                                <option value="">All Prices</option>
+                                <option value="$0-$50" {% if request.args.get('price_range') == '$0-$50' %}selected{% endif %}>$0-$50</option>
+                                <option value="$50-$100" {% if request.args.get('price_range') == '$50-$100' %}selected{% endif %}>$50-$100</option>
+                                <option value="$100-$200" {% if request.args.get('price_range') == '$100-$200' %}selected{% endif %}>$100-$200</option>
+                                <option value="$200+" {% if request.args.get('price_range') == '$200+' %}selected{% endif %}>$200+</option>
+                            </select>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="col-md-6">
+                            <label class="form-label">Minimum Rating</label>
+                            <select class="form-select" name="min_rating" id="rating-filter">
+                                <option value="">Any Rating</option>
+                                <option value="4.5" {% if request.args.get('min_rating') == '4.5' %}selected{% endif %}>4.5+ Stars</option>
+                                <option value="4.0" {% if request.args.get('min_rating') == '4.0' %}selected{% endif %}>4.0+ Stars</option>
+                                <option value="3.5" {% if request.args.get('min_rating') == '3.5' %}selected{% endif %}>3.5+ Stars</option>
+                                <option value="3.0" {% if request.args.get('min_rating') == '3.0' %}selected{% endif %}>3.0+ Stars</option>
+                            </select>
+                        </div>
+
+                        <!-- Season -->
+                        <div class="col-md-6">
+                            <label class="form-label">Best For Season</label>
+                            <select class="form-select" name="season" id="season-filter">
+                                <option value="">All Seasons</option>
+                                <option value="Spring" {% if request.args.get('season') == 'Spring' %}selected{% endif %}>Spring</option>
+                                <option value="Summer" {% if request.args.get('season') == 'Summer' %}selected{% endif %}>Summer</option>
+                                <option value="Fall" {% if request.args.get('season') == 'Fall' %}selected{% endif %}>Fall</option>
+                                <option value="Winter" {% if request.args.get('season') == 'Winter' %}selected{% endif %}>Winter</option>
+                            </select>
+                        </div>
+
+                        <!-- Occasion -->
+                        <div class="col-md-6">
+                            <label class="form-label">Occasion</label>
+                            <select class="form-select" name="occasion" id="occasion-filter">
+                                <option value="">All Occasions</option>
+                                <option value="Casual" {% if request.args.get('occasion') == 'Casual' %}selected{% endif %}>Casual</option>
+                                <option value="Work" {% if request.args.get('occasion') == 'Work' %}selected{% endif %}>Work</option>
+                                <option value="Evening" {% if request.args.get('occasion') == 'Evening' %}selected{% endif %}>Evening</option>
+                                <option value="Special" {% if request.args.get('occasion') == 'Special' %}selected{% endif %}>Special Occasions</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">Clear All</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Rating Modal -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ratingModalLabel">Rate Perfume</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="rating-perfume-name" class="mb-3"></p>
+                <form id="rating-form" method="POST">
+                    <input type="hidden" id="rating-perfume-id" name="perfume_id">
+                    <div class="rating-stars mb-3">
+                        <input type="radio" id="star5" name="rating" value="5" />
+                        <label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star4" name="rating" value="4" />
+                        <label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star3" name="rating" value="3" />
+                        <label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star2" name="rating" value="2" />
+                        <label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star1" name="rating" value="1" />
+                        <label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rating-comment" class="form-label">Comment (optional)</label>
+                        <textarea class="form-control" id="rating-comment" name="comment" rows="2"
+                                  placeholder="Share your thoughts about this perfume..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitRating()">
+                    <i class="fas fa-star"></i> Submit Rating
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Quick rating functionality
+function quickRate(perfumeId, perfumeName) {
+    document.getElementById('rating-perfume-id').value = perfumeId;
+    document.getElementById('rating-perfume-name').textContent = 'Rate: ' + perfumeName;
+    // Reset form
+    document.getElementById('rating-form').reset();
+}
+
+function submitRating() {
+    const form = document.getElementById('rating-form');
+    const formData = new FormData(form);
+
+    fetch('/rate', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Rating submitted successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('ratingModal')).hide();
+            // Optionally refresh the page or update the UI
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('Error submitting rating: ' + (data.message || 'Unknown error'), 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error submitting rating. Please try again.', 'danger');
+    });
+}
+
+function applyFilters() {
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    // Add search term
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.value.trim()) {
+        params.set('search', searchInput.value.trim());
+    }
+
+    // Add sort
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect && sortSelect.value) {
+        params.set('sort', sortSelect.value);
+    }
+
+    // Add filters
+    for (let [key, value] of formData.entries()) {
+        if (value.trim()) {
+            params.set(key, value);
+        }
+    }
+
+    // Navigate to filtered results
+    window.location.href = '/perfumes?' + params.toString();
+}
+
+function clearFilters() {
+    window.location.href = '/perfumes';
+}
+
+function removeFilter(filterName) {
+    const url = new URL(window.location);
+    url.searchParams.delete(filterName);
+    window.location.href = url.toString();
+}
+
+// Initialize search on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.focus();
+        // Position cursor at end
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
+});
+</script>
+{% endblock %}

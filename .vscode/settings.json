@@ -1,0 +1,20 @@
+{
+  "python.defaultInterpreterPath": "e:\\perfume tracker\\.venv\\Scripts\\python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.useLibraryCodeForTypes": true,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportPossiblyUnboundVariable": "none",
+    "reportOptionalMemberAccess": "none"
+  },
+  "cursorpyright.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportPossiblyUnboundVariable": "none",
+    "reportOptionalMemberAccess": "none"
+  },
+  "cursorpyright.analysis.typeCheckingMode": "basic",
+  "cursorpyright.analysis.useLibraryCodeForTypes": true
+}

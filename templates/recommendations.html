@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfume Recommendations</title>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Your Perfume Recommendations</h1>
+        {% if recommendations %}
+            <div class="recommendations">
+                {% for rec in recommendations %}
+                <div class="perfume-card">
+                    <img src="{{ rec.image_url if rec.image_url else url_for('static', filename='images/default_perfume.jpg') }}" alt="{{ rec.name }}" class="perfume-img" />
+                    <h3>{{ rec.name }}</h3>
+                    <p><strong>Brand:</strong> {{ rec.brand }}</p>
+                    <p><strong>Family:</strong> {{ rec.fragrance_family }}</p>
+                    <p><strong>Gender:</strong> {{ rec.gender_target }}</p>
+                    <p><strong>Season:</strong> {{ rec.season }}</p>
+                    <p><strong>Occasion:</strong> {{ rec.occasion }}</p>
+                    <p><strong>Intensity:</strong> {{ rec.intensity }}</p>
+                    <p><strong>Price Range:</strong> {{ rec.price_range }}</p>
+                    {% if rec._score is not none %}
+                    <p><strong>Match Score:</strong> {{ "%.2f"|format(rec._score) }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No recommendations found. Please try different preferences.</p>
+        {% endif %}
+        <a href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+    <button id="scrollTopBtn" class="scroll-top-btn" title="Scroll to top">↑</button>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

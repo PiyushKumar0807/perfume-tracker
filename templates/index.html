@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to PerfumeAI{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-magic"></i> Discover Your Perfect Scent
+                </h1>
+                <p class="lead mb-4">
+                    Let AI analyze your preferences and find the fragrances that match your unique personality and style.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-rocket"></i> Get Started
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/perfume-hero.png') }}"
+                     alt="Perfume bottles" class="img-fluid rounded shadow"
+                     onerror="this.style.display='none'">
+                <div class="text-center">
+                    <i class="fas fa-spray-can fa-5x text-light opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row text-center mb-5">
+        <div class="col">
+            <h2 class="display-5 fw-bold text-primary">How It Works</h2>
+            <p class="lead text-muted">Three simple steps to find your dream fragrance</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">1. Create Your Profile</h5>
+                    <p class="card-text text-muted">
+                        Tell us about yourself - your age, preferences, and fragrance knowledge level.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-brain fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">2. AI Analysis</h5>
+                    <p class="card-text text-muted">
+                        Our machine learning algorithms analyze your preferences and past ratings.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-gift fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">3. Get Recommendations</h5>
+                    <p class="card-text text-muted">
+                        Receive personalized perfume recommendations tailored just for you.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="display-5 fw-bold text-primary">Features</h2>
+                <p class="lead text-muted">Everything you need for the perfect fragrance discovery</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <i class="fas fa-star fa-2x text-warning mb-3"></i>
+                    <h6 class="fw-bold">Smart Recommendations</h6>
+                    <p class="text-muted small">AI-powered suggestions based on your taste</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <i class="fas fa-users fa-2x text-info mb-3"></i>
+                    <h6 class="fw-bold">Community Ratings</h6>
+                    <p class="text-muted small">See what others think about fragrances</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <i class="fas fa-search fa-2x text-success mb-3"></i>
+                    <h6 class="fw-bold">Advanced Search</h6>
+                    <p class="text-muted small">Find perfumes by brand, family, or notes</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <i class="fas fa-user-cog fa-2x text-primary mb-3"></i>
+                    <h6 class="fw-bold">Personal Profiles</h6>
+                    <p class="text-muted small">Customize your fragrance preferences</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row text-center">
+        <div class="col">
+            <h2 class="display-5 fw-bold text-primary mb-4">Ready to Find Your Signature Scent?</h2>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5">
+                <i class="fas fa-rocket"></i> Start Your Journey
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+                    <label for="fall">Fall</label>
+                    <input type="checkbox" id="winter" name="seasons" value="Winter">
+                    <label for="winter">Winter</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Preferred Occasions:</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="casual" name="occasions" value="Casual">
+                    <label for="casual">Casual</label>
+                    <input type="checkbox" id="office" name="occasions" value="Office">
+                    <label for="office">Office</label>
+                    <input type="checkbox" id="evening" name="occasions" value="Evening">
+                    <label for="evening">Evening</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="intensity">Intensity Preference:</label>
+                <select id="intensity" name="intensity">
+                    <option value="Light">Light</option>
+                    <option value="Moderate" selected>Moderate</option>
+                    <option value="Strong">Strong</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="price_range">Price Range:</label>
+                <select id="price_range" name="price_range">
+                    <option value="Budget">Budget</option>
+                    <option value="Mid-range" selected>Mid-range</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Ultra-luxury">Ultra-luxury</option>
+                </select>
+            </div>
+
+            <button type="submit">Get Recommendations</button>
+        </form>
+    </div>
+</body>
+</html>

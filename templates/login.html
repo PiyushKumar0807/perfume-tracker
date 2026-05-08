@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Login - PerfumeAI{% endblock %}
+
+{% block content %}
+<div class="video-bg-wrapper">
+    <video autoplay muted loop playsinline id="authVideo">
+        <source src="{{ url_for('static', filename='login.mp4.mp4
+        ') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="video-overlay"></div>
+</div>
+<div class="container py-5 auth-page">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow auth-card">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-spray-can fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Welcome Back</h2>
+                        <p class="text-muted">Sign in to your PerfumeAI account</p>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   required autofocus>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Don't have an account?
+                            <a href="{{ url_for('register') }}" class="text-primary fw-bold">
+                                Sign up here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PerfumeAI{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-magic me-3"></i>
+                    Welcome back, {{ user.username }}!
+                </h1>
+                <p class="lead mb-4">
+                    {% if not user.profile_complete %}
+                        Complete your profile to unlock personalized fragrance recommendations powered by AI
+                    {% else %}
+                        Discover your perfect scent with our AI-powered recommendation engine
+                    {% endif %}
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    {% if not user.profile_complete %}
+                        <a href="{{ url_for('profile') }}" class="btn btn-light btn-lg px-4">
+                            <i class="fas fa-user-edit me-2"></i>Complete Profile
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('perfumes') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-search me-2"></i>Browse Perfumes
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="floating">
+                    <i class="fas fa-spray-can feature-icon fa-5x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Quick Stats -->
+    <div class="row mb-5 g-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100 glow">
+                <div class="card-body py-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-star fa-3x text-warning"></i>
+                    </div>
+                    <h3 class="mb-2 text-primary">{{ rated_perfumes|length }}</h3>
+                    <p class="text-muted mb-0 fw-semibold">Rated Perfumes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 glow">
+                <div class="card-body py-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart fa-3x text-danger"></i>
+                    </div>
+                    <h3 class="mb-2 text-primary">{{ preferences.get_families()|length if preferences else 0 }}</h3>
+                    <p class="text-muted mb-0 fw-semibold">Favorite Families</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 glow">
+                <div class="card-body py-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar fa-3x text-info"></i>
+                    </div>
+                    <h3 class="mb-2 text-primary">{{ preferences.get_seasons()|length if preferences else 0 }}</h3>
+                    <p class="text-muted mb-0 fw-semibold">Preferred Seasons</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 glow">
+                <div class="card-body py-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock fa-3x text-success"></i>
+                    </div>
+                    <h3 class="mb-2 text-primary">{{ user.created_at.strftime('%m/%d') if user.created_at else 'N/A' }}</h3>
+                    <p class="text-muted mb-0 fw-semibold">Member Since</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="row mb-5">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0 text-primary">
+                    <i class="fas fa-brain me-3"></i>AI-Powered Recommendations
+                    <small class="text-muted fw-normal ms-2">Personalized just for you</small>
+                </h2>
+                <button class="btn btn-outline-primary btn-lg px-4 pulse" onclick="refreshRecommendations(event)">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+
+            <div id="recommendations-container">
+                {% if recommendations %}
+                    <div class="row g-4">
+                        {% for perfume in recommendations %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 perfume-card">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="card-title mb-1">{{ perfume.name }}</h5>
+                                            <p class="text-muted small mb-1">{{ perfume.brand }}</p>
+                                            <p class="text-muted small mb-0">{{ perfume.fragrance_family }}</p>
+                                        </div>
+                                        {% if perfume.avg_rating %}
+                                            <div class="text-end">
+                                                <div class="rating-display mb-1">
+                                                    {% for i in range(5) %}
+                                                        <i class="fas fa-star {{ 'text-warning' if i < perfume.avg_rating else 'text-muted' }}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <small class="text-muted">{{ "%.1f"|format(perfume.avg_rating) }}/5</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <p class="card-text small text-muted flex-grow-1 mb-3">
+                                        {{ perfume.description[:120] }}...
+                                    </p>
+
+                                    <div class="mt-auto">
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ url_for('perfume_detail', perfume_id=perfume.id) }}"
+                                               class="btn btn-primary btn-sm flex-fill">
+                                                <i class="fas fa-eye me-1"></i>View Details
+                                            </a>
+                                            {% if perfume.id not in rated_perfumes %}
+                                                <button class="btn btn-outline-success btn-sm"
+                                                        onclick="quickRate(this.dataset.perfumeId, this.dataset.perfumeName)"
+                                                        data-perfume-id="{{ perfume.id | default(0) }}"
+                                                        data-perfume-name="{{ perfume.name | default('') }}">
+                                                    <i class="fas fa-star me-1"></i>Rate
+                                                </button>
+                                            {% else %}
+                                                <span class="badge bg-success px-3 py-2">
+                                                    <i class="fas fa-check me-1"></i>Rated {{ rated_perfumes[perfume.id].rating }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="floating mb-4">
+                            <i class="fas fa-magic fa-5x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">No recommendations yet</h4>
+                        <p class="text-muted mb-4">Complete your profile and rate some perfumes to unlock personalized AI recommendations!</p>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ url_for('profile') }}" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-user-edit me-2"></i>Complete Profile
+                            </a>
+                            <a href="{{ url_for('perfumes') }}" class="btn btn-outline-primary btn-lg px-4">
+                                <i class="fas fa-search me-2"></i>Browse Perfumes
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    {% if recent_ratings %}
+    <div class="row">
+        <div class="col">
+            <h3 class="mb-4 text-primary">
+                <i class="fas fa-history me-3"></i>Your Recent Ratings
+                <small class="text-muted fw-normal ms-2">Your fragrance journey</small>
+            </h3>
+
+            <div class="row g-4">
+                {% for rating in recent_ratings %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 perfume-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="card-title mb-1">{{ rating.perfume.name }}</h6>
+                                    <p class="text-muted small mb-2">{{ rating.perfume.brand }}</p>
+                                    <div class="rating-display">
+                                        {% for i in range(5) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i < rating.rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                        <span class="ms-2 fw-semibold">{{ rating.rating }}/5</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">{{ rating.rated_at.strftime('%b %d') if rating.rated_at else '' }}</small>
+                                    <small class="text-muted">{{ rating.rated_at.strftime('%Y') if rating.rated_at else '' }}</small>
+                                </div>
+                            </div>
+                            {% if rating.review %}
+                                <div class="bg-light p-3 rounded">
+                                    <p class="card-text small mb-0">"{{ rating.review[:100] }}{% if rating.review|length > 100 %}...{% endif %}"</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Rate Modal -->
+<div class="modal fade" id="quickRateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rate <span id="modalPerfumeName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickRateForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="modalPerfumeId" name="perfume_id">
+
+                    <div class="mb-3">
+                        <label class="form-label">Your Rating</label>
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required>
+                                <label for="star{{ i }}" class="fas fa-star"></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="review" class="form-label">Review (optional)</label>
+                        <textarea class="form-control" id="review" name="review" rows="3"
+                                  placeholder="Share your thoughts about this fragrance..."></textarea>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="used_before" name="used_before">
+                        <label class="form-check-label" for="used_before">
+                            I have used this perfume before
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Rating</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+function quickRate(perfumeId, perfumeName) {
+    const parsedId = parseInt(perfumeId, 10) || 0;
+    document.getElementById('modalPerfumeId').value = parsedId;
+    document.getElementById('modalPerfumeName').textContent = perfumeName;
+    document.getElementById('quickRateForm').action = '/rate';
+
+    // Reset form
+    document.getElementById('quickRateForm').reset();
+    document.querySelectorAll('.rating-stars input').forEach(input => input.checked = false);
+
+    new bootstrap.Modal(document.getElementById('quickRateModal')).show();
+}
+
+function refreshRecommendations(event) {
+    const button = event.target.closest('button');
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    button.disabled = true;
+
+    fetch('/api/recommendations')
+        .then(response => response.json())
+        .then(data => {
+            // Update recommendations container
+            const container = document.getElementById('recommendations-container');
+            if (data.recommendations && data.recommendations.length > 0) {
+                let html = '<div class="row g-4">';
+                data.recommendations.forEach(perfume => {
+                    html += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 perfume-card">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-1">${perfume.name}</h6>
+                                        ${perfume.avg_rating ? `<span class="badge bg-warning text-dark"><i class="fas fa-star"></i> ${perfume.avg_rating}</span>` : ''}
+                                    </div>
+                                    <p class="text-muted small mb-2">${perfume.brand}</p>
+                                    <p class="text-muted small mb-2">${perfume.fragrance_family}</p>
+                                    <p class="card-text small flex-grow-1">${perfume.description}</p>
+                                    <div class="mt-auto">
+                                        <a href="/perfume/${perfume.id}" class="btn btn-primary btn-sm flex-fill">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing recommendations:', error);
+        })
+        .finally(() => {
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        });
+}
+</script>
+{% endblock %}
+{% endblock %}
